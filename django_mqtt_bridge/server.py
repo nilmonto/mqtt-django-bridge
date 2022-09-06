@@ -37,7 +37,8 @@ async def mqtt_group_discard(future, channel_layer, group):
 class Server(object):
     def __init__(self, channel, host, port, username=None, password=None,
                  client_id=None, topics_subscription=None, mqtt_channel_name=None,
-                 mqtt_channel_sub=None, mqtt_channel_pub=None):
+                 mqtt_channel_sub=None, mqtt_channel_pub=None, cafile=None, capath=None,
+                 cert=None, key=None):
 
         self.channel = channel
         self.host = host
@@ -64,9 +65,12 @@ class Server(object):
         self.mqtt_channel_pub = mqtt_channel_pub or "mqtt.pub"
         self.mqtt_channel_sub = mqtt_channel_sub or "mqtt.sub"
 
+        self.client.tls_set(ca_certs=capath, certfile=cafile, keyfile=key, cert_reqs=cert)
+
     def _on_connect(self, client, userdata, flags, rc):
         logger.info("Connected with status {}".format(rc))
         client.subscribe(self.topics_subscription)
+        logger.info("subscribed to topics: {}".format(self.topics_subscription))
 
     def _on_disconnect(self, client, userdata, rc):
         logger.info("Disconnected")
@@ -142,9 +146,8 @@ class Server(object):
         if self.username:
             self.client.username_pw_set(username=self.username, password=self.password)
 
+        logger.info("Starting client connection to MQTT Broker..")
         self.client.connect(self.host, self.port)
-
-        logger.info("Starting loop")
 
         while True:
             self.client.loop(0.1)

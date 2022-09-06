@@ -24,6 +24,16 @@ def main():
                         default="localhost")
     parser.add_argument("-p", "--port", help="MQTT broker port", type=int,
                         default=1883)
+    parser.add_argument("--cafile", help="path to a file containing trusted CA certificates to enable encrypted"
+                                         " communication.", type=str,
+                        default=None)
+    parser.add_argument("--capath", help="path to a directory containing trusted CA certificates to enable encrypted"
+                                         " communication.", type=str,
+                        default=None)
+    parser.add_argument("--cert", help="client certificate for authentication, if required by server.", type=str,
+                        default=None)
+    parser.add_argument("--key", help="client private key for authentication, if required by server.", type=str,
+                        default=None)
     parser.add_argument("-v", "--verbosity", action="count", default=0,
                         help="Set verbosity")
     parser.add_argument("channel_layer",
@@ -88,7 +98,11 @@ def main():
             topics_subscription=topics, 
             mqtt_channel_name=args.channel_name, 
             mqtt_channel_sub=args.channel_sub, 
-            mqtt_channel_pub=args.channel_pub
+            mqtt_channel_pub=args.channel_pub,
+            cafile=args.cafile,
+            capath=args.capath,
+            cert=args.cert,
+            key=args.key
         )
 
     server.run()
