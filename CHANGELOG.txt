@@ -1,3 +1,12 @@
+0.4.2 (2022-09-19)
+------------------
+* fix --Definition of retries on reconnection to broker
+* fix --Connection using port 8883 shall automatically enable ssl
+
+0.4.0 (2022-09-06)
+------------------
+* Add --call to tls_set in order to enable SSL encryption.
+
 0.3.1 (2021-02-28)
 ------------------
 * fix --client_pool_message change to mqtt_channel_pub to send messages.

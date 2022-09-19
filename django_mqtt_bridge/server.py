@@ -38,8 +38,8 @@ class Server(object):
     def __init__(self, channel, host, port, username=None, password=None,
                  client_id=None, topics_subscription=None, mqtt_channel_name=None,
                  mqtt_channel_sub=None, mqtt_channel_pub=None, cafile=None, capath=None,
-                 cert=None, key=None):
-
+                 cert=None, key=None, retries=0):
+        self.retries = int(retries or 0)
         self.channel = channel
         self.host = host
         self.port = port
@@ -65,7 +65,8 @@ class Server(object):
         self.mqtt_channel_pub = mqtt_channel_pub or "mqtt.pub"
         self.mqtt_channel_sub = mqtt_channel_sub or "mqtt.sub"
 
-        self.client.tls_set(ca_certs=capath, certfile=cafile, keyfile=key, cert_reqs=cert)
+        if capath or cafile or key or cert or port == 8883:
+            self.client.tls_set(ca_certs=capath, certfile=cafile, keyfile=key, cert_reqs=cert)
 
     def _on_connect(self, client, userdata, flags, rc):
         logger.info("Connected with status {}".format(rc))
@@ -75,16 +76,19 @@ class Server(object):
     def _on_disconnect(self, client, userdata, rc):
         logger.info("Disconnected")
         if not self.stop:
-            j = 3
-            for i in range(j):
+            while self.retries >= 0:
                 logger.info("Trying to reconnect")
                 try:
                     client.reconnect()
                     logger.info("Reconnected")
                     break
                 except Exception as e:
-                    if i < j:
-                        logger.warn(e)
+                    if self.retries >= 0:
+                        if self.retries == 1:
+                            self.retries = -1
+                        elif self.retries > 0:
+                            self.retries -= 1
+                        logger.warning(e)
                         time.sleep(1)
                         continue
                     else:

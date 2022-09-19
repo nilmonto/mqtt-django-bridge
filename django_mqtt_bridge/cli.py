@@ -58,6 +58,9 @@ def main():
     parser.add_argument("-x", "--channel-pub",
             help="Name of Channels's channel for MQTT Pub messages, default is mqtt.sub")
 
+    parser.add_argument("-r", "--retries",
+                        help="Retries of reconnection to broker, set 0 for infinite retries")
+
     args = parser.parse_args()
  
     logging.basicConfig(
@@ -102,7 +105,8 @@ def main():
             cafile=args.cafile,
             capath=args.capath,
             cert=args.cert,
-            key=args.key
+            key=args.key,
+            retries=args.retries
         )
 
     server.run()
