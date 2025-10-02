@@ -5,6 +5,7 @@ import logging
 import time
 import signal
 import json
+import uuid
 
 import paho.mqtt.client as mqtt
 
@@ -43,7 +44,7 @@ class Server(object):
         self.channel = channel
         self.host = host
         self.port = port
-        self.client_id = client_id
+        self.client_id = client_id or f"bridge-{uuid.uuid4()}"
         self.client = mqtt.Client(client_id=self.client_id, userdata={
             "server": self,
             "channel": self.channel,
@@ -192,7 +193,7 @@ class Server(object):
     def stop_server(self, signum):
         logger.info("Received signal {}, terminating".format(signum))
         self.stop = True
-        for task in asyncio.Task.all_tasks():
+        for task in asyncio.all_tasks(self.loop):
             task.cancel()
         self.loop.stop()
 
